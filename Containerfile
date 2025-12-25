@@ -1,33 +1,35 @@
-# llama-swappo-halo: LLM proxy for AMD Strix Halo
+# llama-swappo-halo: LLM proxy + llama.cpp for AMD Strix Halo (GMKtec EVO X2)
 #
-# NOTE: This Containerfile builds the llama-swap proxy only.
-# For full builds with llama.cpp, use krohnos-k3s/docker/llama-swappo-halo
-# or build locally with ROCm.
+# kyuz0/amd-strix-halo-toolboxes already includes llama.cpp with ROCm
+# We just add llama-swappo (Go proxy with Ollama API translation)
 #
-# Build: buildah bud -t llama-swappo-halo .
+# Build: ./build.sh
+# Build+Push: ./build.sh --ghcr
 
 ARG BACKEND=rocm-6.4.4-rocwmma
 
-# Build llama-swappo (Go proxy with Ollama translation)
+# Build llama-swappo binary
 FROM alpine:latest AS builder
 
 RUN apk add --no-cache git go nodejs npm ca-certificates
 
 WORKDIR /build
 RUN git clone https://github.com/mootikins/llama-swappo.git && \
-    cd llama-swappo/ui && npm install && npm run build && \
-    cd .. && CGO_ENABLED=0 go build -o llama-swap . && strip llama-swap
+    cd llama-swappo && \
+    cd ui && npm install && npm run build && \
+    cd .. && \
+    CGO_ENABLED=0 go build -o llama-swap . && \
+    strip llama-swap
 
-# Runtime - using kyuz0 toolbox which has ROCm runtime
-FROM kyuz0/amd-strix-halo-toolboxes:${BACKEND}
+# Use kyuz0 toolbox which has llama.cpp + ROCm pre-built
+FROM docker.io/kyuz0/amd-strix-halo-toolboxes:${BACKEND}
 
 WORKDIR /app
 RUN mkdir -p /models
 
+# Copy llama-swappo binary
 COPY --from=builder /build/llama-swappo/llama-swap /app/llama-swap
 RUN chmod +x /app/llama-swap
-
-ENV PATH="/app:${PATH}"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1

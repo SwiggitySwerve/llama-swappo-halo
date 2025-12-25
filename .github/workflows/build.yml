@@ -1,14 +1,13 @@
 name: Build & Push Container
 
 on:
-  # Disabled automatic builds - ROCm compilation requires local build
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - 'Containerfile*'
-  #     - 'build.sh'
-  #     - '.github/workflows/build.yml'
-  workflow_dispatch:  # Manual trigger only
+  push:
+    branches: [main]
+    paths:
+      - 'Containerfile*'
+      - 'build.sh'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -16,7 +15,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # llama.cpp ROCm build takes ~30-60 min
     permissions:
       contents: read
       packages: write

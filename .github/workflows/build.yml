@@ -15,6 +15,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120  # llama.cpp ROCm build takes ~30-60 min
     permissions:
       contents: read
       packages: write

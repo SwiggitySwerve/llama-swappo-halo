@@ -21,8 +21,8 @@ FROM kyuz0/amd-strix-halo-toolboxes:${BACKEND} AS llama-builder
 
 WORKDIR /build
 
-# Install git and clone llama.cpp
-RUN dnf install -y git && dnf clean all
+# Install build tools
+RUN dnf install -y git cmake gcc-c++ make && dnf clean all
 
 # Clone and build llama.cpp with ROCm support
 RUN git clone --depth 1 https://github.com/ggerganov/llama.cpp.git && \

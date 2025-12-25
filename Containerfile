@@ -21,6 +21,9 @@ FROM kyuz0/amd-strix-halo-toolboxes:${BACKEND} AS llama-builder
 
 WORKDIR /build
 
+# Install git and clone llama.cpp
+RUN dnf install -y git && dnf clean all
+
 # Clone and build llama.cpp with ROCm support
 RUN git clone --depth 1 https://github.com/ggerganov/llama.cpp.git && \
     cd llama.cpp && \
@@ -57,7 +60,7 @@ COPY --from=llama-builder /build/llama.cpp/gguf-py /usr/local/lib/python3.12/sit
 RUN ldconfig
 
 ENV PATH="/app:/usr/local/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/local/lib:/opt/rocm/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/lib:/opt/rocm/lib"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1

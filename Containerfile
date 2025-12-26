@@ -36,7 +36,8 @@ FROM rocm/dev-ubuntu-22.04:6.2.4 AS whisper-builder
 
 ARG WHISPER
 RUN if [ "$WHISPER" = "true" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends git cmake && \
+        apt-get update && apt-get install -y --no-install-recommends \
+            git cmake hipblas-dev rocblas-dev && \
         git clone https://github.com/ggml-org/whisper.cpp.git /build/whisper.cpp && \
         cd /build/whisper.cpp && \
         mkdir build && cd build && \

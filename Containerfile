@@ -34,8 +34,9 @@ RUN git clone https://github.com/mootikins/llama-swappo.git && \
 FROM docker.io/kyuz0/amd-strix-halo-toolboxes:${BACKEND} AS whisper-builder
 
 ARG WHISPER
+# Base image already has ROCm/HIP - only install build tools
 RUN if [ "$WHISPER" = "true" ]; then \
-        dnf install -y git cmake make gcc gcc-c++ glibc-devel libstdc++-devel rocm-hip-sdk && \
+        dnf install -y git cmake make && \
         git clone https://github.com/ggml-org/whisper.cpp.git /build/whisper.cpp && \
         cd /build/whisper.cpp && \
         mkdir build && cd build && \

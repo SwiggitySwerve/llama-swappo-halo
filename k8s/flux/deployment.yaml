@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-swappo-halo
+  labels:
+    app: llama-swappo-halo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama-swappo-halo
+  template:
+    metadata:
+      labels:
+        app: llama-swappo-halo
+    spec:
+      hostNetwork: true
+      containers:
+      - name: llama-swappo-halo
+        image: ghcr.io/mootikins/llama-swappo-halo:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: LD_LIBRARY_PATH
+          value: "/app/lib:$(LD_LIBRARY_PATH)"
+        volumeMounts:
+        - name: models
+          mountPath: /models
+          readOnly: true
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        - name: dri
+          mountPath: /dev/dri
+        - name: kfd
+          mountPath: /dev/kfd
+        securityContext:
+          privileged: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "2Gi"
+          limits:
+            memory: "32Gi"
+      volumes:
+      - name: models
+        hostPath:
+          path: /var/lib/llama-swappo/models
+          type: Directory
+      - name: config
+        hostPath:
+          path: /etc/llama-swappo
+          type: Directory
+      - name: dri
+        hostPath:
+          path: /dev/dri
+          type: Directory
+      - name: kfd
+        hostPath:
+          path: /dev/kfd
+          type: CharDevice

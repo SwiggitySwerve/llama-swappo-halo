@@ -1,0 +1,8 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: llama-swappo-halo
+  namespace: flux-system
+spec:
+  image: ghcr.io/mootikins/llama-swappo-halo
+  interval: 5m

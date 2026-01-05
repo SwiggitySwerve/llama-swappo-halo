@@ -38,6 +38,83 @@ docker run --rm -it \
   -config /app/config.yaml
 ```
 
+## GitOps Deployment with Flux CD
+
+This repository includes Flux CD GitOps automation for easy deployment to k3s.
+
+### Initial Setup
+
+Install Flux CLI and bootstrap:
+```bash
+# Install Flux CLI
+curl -sL https://fluxcd.io/install.sh | sudo bash
+
+# Bootstrap Flux on k3s
+flux bootstrap github \
+  --owner=mootikins \
+  --repository=llama-swappo-halo \
+  --branch=main \
+  --path=./k8s/flux \
+  --personal \
+  --interval=1m
+```
+
+### Flux GitOps Workflow
+
+With Flux installed, deployments are automated:
+
+1. **Make changes** to manifests in `k8s/flux/`
+2. **Commit and push** to GitHub
+3. **Flux automatically applies** changes to the cluster
+
+No manual `kubectl apply` needed!
+
+### Helper Scripts
+
+- `./scripts/flux-sync.sh` - Force immediate sync and show status
+- `./scripts/flux-status.sh` - Display all Flux resources and status
+- `./scripts/k8s-logs.sh` - Enhanced log viewing for app and Flux
+
+### Common Operations
+
+```bash
+# Check sync status
+flux get kustomizations
+
+# Force immediate sync
+flux reconcile kustomization flux-system --with-source
+
+# View Flux resources
+flux get sources git
+flux get sources image
+
+# Rollback (via Git)
+git revert HEAD
+git push  # Flux will auto-apply the revert
+```
+
+### Image Automation
+
+Flux can automatically update deployments when new container images are pushed to ghcr.io. This is configured in `k8s/flux/image-*.yaml`.
+
+### Troubleshooting
+
+```bash
+# Check Flux controller status
+kubectl get pods -n flux-system
+
+# View Flux logs
+./scripts/k8s-logs.sh --flux
+
+# Check for errors
+kubectl get events -n flux-system --field-selector type=Warning
+
+# Verify prerequisites
+flux check --pre
+```
+
+For more details, see [k8s/README.md](k8s/README.md).
+
 ## Configuration
 
 See [llama-swappo documentation](https://github.com/Mootikins/llama-swappo) for config.yaml format.

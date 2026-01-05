@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: llama-swappo-halo
+  namespace: default
   labels:
     app: llama-swappo-halo
 spec:

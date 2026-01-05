@@ -41,6 +41,8 @@ done
 MODELS=(
   "Nomic Embed v1.5 Q8|nomic-ai/nomic-embed-text-v1.5-GGUF|*Q8_0.gguf|nomic-ai/nomic-embed-text-v1.5-GGUF"
   "Qwen2.5 Coder 3B Q4|Qwen/Qwen2.5-Coder-3B-Instruct-GGUF|*q4_k_m.gguf|Qwen/Qwen2.5-Coder-3B-Instruct-GGUF"
+  "Qwen2.5 Coder 7B Q5|Qwen/Qwen2.5-Coder-7B-Instruct-GGUF|*Q5_K_M.gguf|Qwen/Qwen2.5-Coder-7B-Instruct-GGUF"
+  "DeepSeek Coder V2 Lite Q4|bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF|*Q4_K_M.gguf|bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF"
   "Llama 3.2 3B Q8|lmstudio-community/Meta-Llama-3.2-3B-Instruct-GGUF|*Q8_0.gguf|Meta-Llama-3.2-3B-Instruct-GGUF"
   "Phi-3 Mini Q4|microsoft/Phi-3-mini-4k-instruct-gguf|*q4_k_m.gguf|microsoft/Phi-3-mini-4k-instruct-gguf"
   "GPT-OSS 20B Q8|unsloth/gpt-oss-20b-GGUF|*Q8_K_XL.gguf|unsloth/gpt-oss-20b-GGUF"

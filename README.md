@@ -11,6 +11,7 @@ Based on [kyuz0/amd-strix-halo-toolboxes](https://github.com/kyuz0/amd-strix-hal
 - llama-swappo proxy with Ollama API translation
 - llama.cpp with ROCm/HIP acceleration for gfx1151
 - Optional: whisper.cpp for speech-to-text
+- CPU-only mode support for Strix Halo (with workaround for GPU memory issues)
 
 ## Build
 
@@ -23,6 +24,40 @@ Based on [kyuz0/amd-strix-halo-toolboxes](https://github.com/kyuz0/amd-strix-hal
 ```
 
 ## Quick Start
+
+### Strix Halo CPU-Only Mode (Recommended)
+
+The llama.cpp binary in this container has GPU support for gfx1151, but may encounter memory access faults when using the integrated GPU. The recommended setup is CPU-only mode:
+
+**5-Minute Setup:**
+```bash
+# 1. Clone and download models
+git clone https://github.com/SwiggitySwerve/llama-swappo-halo.git
+cd llama-swappo-halo
+./scripts/download-models.sh --models-dir /var/lib/llama-swappo/models
+
+# 2. Configure
+sudo mkdir -p /etc/llama-swappo
+sudo cp config/strix-halo-cpu-only.yaml /etc/llama-swappo/config.yaml
+
+# 3. Deploy
+kubectl apply -f k8s/flux/
+
+# 4. Test
+curl -s http://localhost:8080/v1/models | jq .
+```
+
+**Documentation:**
+- [Quick Start Guide](docs/QUICKSTART.md) - Fastest path to running
+- [Strix Halo CPU-Only Setup](docs/STRIX_HALLO_CPU_ONLY.md) - Comprehensive guide with troubleshooting
+
+**Configured Models:**
+- Qwen2.5-Coder-7B Q5_K_M (5GB, 88.4% HumanEval) - ~10 tok/s
+- DeepSeek-Coder-V2-Lite Q4_K_M (9GB, 89% HumanEval) - ~27 tok/s
+
+### Docker/Podman (GPU Mode)
+
+For testing with GPU acceleration:
 
 ```bash
 # Pull from ghcr.io

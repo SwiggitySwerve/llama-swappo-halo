@@ -49,7 +49,8 @@ curl -s http://localhost:8080/v1/models | jq .
 
 **Documentation:**
 - [Quick Start Guide](docs/QUICKSTART.md) - Fastest path to running
-- [Strix Halo CPU-Only Setup](docs/STRIX_HALLO_CPU_ONLY.md) - Comprehensive guide with troubleshooting
+- [Strix Halo CPU-Only Setup](docs/STRIX_HALLO_CPU_ONLY.md) - Comprehensive setup guide with troubleshooting
+- [API Usage Guide](docs/API_USAGE_GUIDE.md) - Complete guide for consuming the hosted models
 
 **Configured Models:**
 - Qwen2.5-Coder-7B Q5_K_M (5GB, 88.4% HumanEval) - ~10 tok/s

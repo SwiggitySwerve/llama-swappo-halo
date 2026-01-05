@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llama Swappo Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .model-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .model-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .model-item.selected {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .model-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .model-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: #764ba2;
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .message-content code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .message.user .message-content code {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-container textarea {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            height: 80px;
+        }
+
+        .input-container textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .clear-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦙 Llama Swappo Dashboard</h1>
+            <p style="color: #666; margin-top: 8px;">Manage and interact with your code models</p>
+            <div style="margin-top: 16px;">
+                <span id="status" class="status offline">Checking...</span>
+                <span id="responseTime" style="margin-left: 16px; color: #666;"></span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>🤖 Available Models</h2>
+                <div id="modelList" class="model-list">
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 12px;">Loading models...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💬 Chat Interface</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message assistant">
+                            <div class="message-avatar">AI</div>
+                            <div class="message-content">
+                                Hello! I'm ready to help you with coding tasks. Select a model from the left and ask me anything!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-container">
+                        <textarea id="userInput" placeholder="Ask for code, explanations, or help with debugging..."></textarea>
+                        <button id="sendBtn" class="btn btn-primary" onclick="sendMessage()">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Usage Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalRequests">0</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalTokens">0</div>
+                    <div class="stat-label">Total Tokens</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="avgTime">0s</div>
+                    <div class="stat-label">Avg Response Time</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="currentModel">-</div>
+                    <div class="stat-label">Current Model</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/v1';
+        let selectedModel = null;
+        let conversationHistory = [];
+        let stats = {
+            requests: 0,
+            tokens: 0,
+            totalTime: 0
+        };
+
+        // Check service health
+        async function checkHealth() {
+            try {
+                const start = Date.now();
+                const response = await fetch('http://localhost:8080/health');
+                const elapsed = Date.now() - start;
+
+                const statusEl = document.getElementById('status');
+                const timeEl = document.getElementById('responseTime');
+
+                if (response.ok) {
+                    statusEl.textContent = '● Online';
+                    statusEl.className = 'status online';
+                    timeEl.textContent = `Response: ${elapsed}ms`;
+                } else {
+                    throw new Error('Not OK');
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = '● Offline';
+                statusEl.className = 'status offline';
+                document.getElementById('responseTime').textContent = '';
+            }
+        }
+
+        // Load available models
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE}/models`);
+                const data = await response.json();
+
+                const modelList = document.getElementById('modelList');
+                modelList.innerHTML = '';
+
+                data.data.forEach(model => {
+                    const div = document.createElement('div');
+                    div.className = 'model-item';
+                    div.onclick = () => selectModel(model, div);
+
+                    const name = document.createElement('div');
+                    name.className = 'model-name';
+                    name.textContent = model.name || model.id;
+
+                    const desc = document.createElement('div');
+                    desc.className = 'model-description';
+                    desc.textContent = model.description || 'Code generation model';
+
+                    div.appendChild(name);
+                    div.appendChild(desc);
+                    modelList.appendChild(div);
+                });
+
+                // Auto-select first model
+                if (data.data.length > 0) {
+                    const firstModel = data.data[0];
+                    const firstItem = modelList.querySelector('.model-item');
+                    selectModel(firstModel, firstItem);
+                }
+            } catch (error) {
+                document.getElementById('modelList').innerHTML =
+                    '<div style="text-align: center; padding: 40px; color: #999;">' +
+                    '<p>❌ Failed to load models</p></div>';
+            }
+        }
+
+        // Select a model
+        function selectModel(model, element) {
+            selectedModel = model;
+
+            // Update UI
+            document.querySelectorAll('.model-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+
+            document.getElementById('currentModel').textContent =
+                model.name.split(' ')[0] || model.id.split('-')[0];
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+
+            if (!message || !selectedModel) return;
+
+            // Add user message to chat
+            addMessage('user', message);
+            input.value = '';
+
+            // Disable send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span>';
+
+            try {
+                const start = Date.now();
+
+                // Build messages array
+                const messages = [
+                    ...conversationHistory,
+                    { role: 'user', content: message }
+                ];
+
+                const response = await fetch(`${API_BASE}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel.id,
+                        messages: messages,
+                        max_tokens: 1000
+                    })
+                });
+
+                const data = await response.json();
+                const elapsed = (Date.now() - start) / 1000;
+
+                const assistantMessage = data.choices[0].message.content;
+
+                // Add assistant message
+                addMessage('assistant', assistantMessage);
+
+                // Update conversation history
+                conversationHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: assistantMessage }
+                );
+
+                // Update stats
+                stats.requests++;
+                stats.tokens += data.usage?.total_tokens || 0;
+                stats.totalTime += elapsed;
+                updateStats();
+
+            } catch (error) {
+                addMessage('assistant', '❌ Error: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        // Add message to chat
+        function addMessage(role, content) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? 'U' : 'AI';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            // Format code blocks
+            const formattedContent = content
+                .replace(/```(\w+)?\n/g, '<pre><code>')
+                .replace(/```/g, '</code></pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+
+            contentDiv.innerHTML = formattedContent;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Update statistics display
+        function updateStats() {
+            document.getElementById('totalRequests').textContent = stats.requests;
+            document.getElementById('totalTokens').textContent = stats.tokens.toLocaleString();
+            document.getElementById('avgTime').textContent =
+                stats.requests > 0
+                    ? (stats.totalTime / stats.requests).toFixed(2) + 's'
+                    : '0s';
+        }
+
+        // Clear chat
+        function clearChat() {
+            conversationHistory = [];
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        Chat cleared. How can I help you with coding today?
+                    </div>
+                </div>
+            `;
+        }
+
+        // Handle Enter key
+        document.getElementById('userInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initialize
+        checkHealth();
+        loadModels();
+        setInterval(checkHealth, 10000); // Check health every 10s
+    </script>
+</body>
+</html>

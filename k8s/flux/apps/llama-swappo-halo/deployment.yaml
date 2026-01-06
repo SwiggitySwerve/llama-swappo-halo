@@ -6,14 +6,17 @@ metadata:
   labels:
     app: llama-swappo-halo
   annotations:
-    config-version: "2026-01-05-discover-5-models"
+    config-version: "2026-01-05-metallb-zero-downtime"
 spec:
   replicas: 1
-  # Use Recreate strategy to prevent port conflicts with hostNetwork
-  # This terminates the old pod before starting the new one
-  # Brief downtime (~30s) during updates, but avoids port 8080 conflicts
+  # RollingUpdate strategy for zero-downtime deployments
+  # maxSurge: 1 allows one extra pod during update
+  # maxUnavailable: 0 ensures at least 1 pod always running
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: llama-swappo-halo
@@ -22,7 +25,7 @@ spec:
       labels:
         app: llama-swappo-halo
     spec:
-      hostNetwork: true
+      terminationGracePeriodSeconds: 90
       containers:
       - name: llama-swappo-halo
         image: ghcr.io/mootikins/llama-swappo-halo:latest
@@ -48,6 +51,10 @@ spec:
           mountPath: /dev/kfd
         securityContext:
           privileged: true
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
         livenessProbe:
           httpGet:
             path: /health
@@ -61,8 +68,9 @@ spec:
             path: /health
             port: 8080
           initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 2
           failureThreshold: 3
         resources:
           requests:

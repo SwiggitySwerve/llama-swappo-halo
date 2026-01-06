@@ -5,8 +5,11 @@ metadata:
   namespace: default
   labels:
     app: llama-swappo-halo
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.68.100
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
   ports:
   - port: 8080
     targetPort: 8080

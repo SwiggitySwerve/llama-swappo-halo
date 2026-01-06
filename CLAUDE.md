@@ -95,6 +95,73 @@ flux reconcile kustomization flux-system --with-source
 ./scripts/k8s-logs.sh --flux
 ```
 
+### Forcing Flux Reconciliation and Pod Restarts
+
+**Method 1: Manual kubectl restart (quickest)**
+```bash
+# Restart deployment immediately
+kubectl rollout restart deployment/llama-swappo-halo
+
+# Watch rollout status
+kubectl rollout status deployment/llama-swappo-halo
+```
+
+**Method 2: Force Flux reconciliation**
+```bash
+# Reconcile Flux system (pulls latest Git commits and applies)
+flux reconcile kustomization flux-system --with-source
+
+# Reconcile specific resource
+flux reconcile kustomization llama-swappo-halo
+```
+
+**Method 3: Annotation-based restart (GitOps-friendly)**
+```bash
+# Update deployment annotation to trigger Flux restart
+# Edit k8s/flux/deployment.yaml and change:
+metadata:
+  annotations:
+    config-version: "unique-value-here"  # Change this value
+
+# Commit and push
+git add k8s/flux/deployment.yaml
+git commit -m "chore: trigger deployment restart"
+git push
+
+# Flux detects annotation change and restarts pods
+```
+
+**Method 4: ConfigMap-based configuration workflow**
+```bash
+# 1. Edit ConfigMap
+vim k8s/flux/configmap.yaml
+
+# 2. Commit and push
+git add k8s/flux/configmap.yaml
+git commit -m "feat: update model configuration"
+git push
+
+# 3. Force restart via annotation change
+# Edit k8s/flux/deployment.yaml, update config-version annotation
+vim k8s/flux/deployment.yaml
+# Change: config-version: "v2" (or any unique value)
+
+git add k8s/flux/deployment.yaml
+git commit -m "chore: trigger config reload"
+git push
+
+# Flux will:
+# - Update the ConfigMap
+# - Detect deployment annotation change
+# - Restart pods with new configuration
+```
+
+**Important Notes:**
+- ConfigMap changes alone do NOT trigger pod restarts in Kubernetes
+- You must either restart manually or update deployment annotations
+- The annotation method is GitOps-friendly (no kubectl access needed)
+- Flux syncs every 5 minutes by default, or use `flux reconcile` for immediate sync
+
 ### Model Management
 
 ```bash
@@ -185,7 +252,7 @@ cmd: |
 - **Network**: `hostNetwork: true` (pod uses host network for LAN access)
 - **Storage**:
   - Models: `/var/lib/llama-swappo/models` (hostPath)
-  - Config: `/etc/llama-swappo/config.yaml` (hostPath)
+  - Config: `llama-swappo-halo-config` ConfigMap (GitOps-managed)
   - GPU devices: `/dev/dri`, `/dev/kfd` (hostPath, privileged mode)
 
 ### Service Exposure
@@ -199,17 +266,32 @@ The service uses `hostNetwork: true` for direct LAN access:
 
 ### Config Change Workflow
 
-1. Edit `/etc/llama-swappo/config.yaml` on host
-2. Restart deployment: `kubectl rollout restart deployment/llama-swappo-halo`
-3. llama-swap picks up new config on next request
-4. Models are swapped in/out dynamically based on group configuration
+**GitOps Workflow (Recommended):**
+
+1. Edit `k8s/flux/configmap.yaml` (model configurations)
+2. Edit `k8s/flux/deployment.yaml` and update `config-version` annotation
+3. Commit and push to Git
+4. Flux automatically applies ConfigMap and restarts deployment
+5. llama-swap picks up new config on next request
+
+**Alternative: Manual kubectl workflow:**
+```bash
+# 1. Edit ConfigMap directly in cluster
+kubectl edit configmap llama-swappo-halo-config
+
+# 2. Restart deployment
+kubectl rollout restart deployment/llama-swappo-halo
+```
+
+**Note**: Models are swapped in/out dynamically based on group configuration, no manual intervention needed.
 
 ## Important File Locations
 
-- **Config**: `/etc/llama-swappo/config.yaml` (mounted into pod at `/app/config.yaml`)
+- **ConfigMap**: `k8s/flux/configmap.yaml` (GitOps-managed, mounted into pod at `/app/config.yaml`)
 - **Models**: `/var/lib/llama-swappo/models/` (mounted into pod at `/models/`)
-- **Manifests**: `k8s/flux/` (managed by Flux CD)
-- **Example configs**: `config/strix-halo-cpu-only.yaml` (recommended for Strix Halo)
+- **Deployment**: `k8s/flux/deployment.yaml` (managed by Flux CD)
+- **Service**: `k8s/flux/service.yaml` (managed by Flux CD)
+- **Example configs**: `config/strix-halo-cpu-only.yaml` (reference for local development)
 
 ## Troubleshooting
 

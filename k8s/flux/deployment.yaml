@@ -6,7 +6,7 @@ metadata:
   labels:
     app: llama-swappo-halo
   annotations:
-    config-version: "configmap-v1"
+    config-version: "2026-01-05-discover-5-models"
 spec:
   replicas: 1
   selector:

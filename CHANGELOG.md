@@ -4,7 +4,7 @@ All modifications and additions to the upstream llama-swappo-halo repository.
 
 ## Overview
 
-This fork adds CPU-only support for AMD Strix Halo, comprehensive documentation, testing utilities, and web UI for the llama-swappo-halo project.
+This fork adds CPU-only support for AMD Strix Halo, comprehensive documentation, and testing utilities for the llama-swappo-halo project.
 
 **Repository**: https://github.com/SwiggitySwerve/llama-swappo-halo
 **Upstream**: https://github.com/Mootikins/llama-swappo-halo
@@ -31,19 +31,6 @@ This fork adds CPU-only support for AMD Strix Halo, comprehensive documentation,
   - Both models configured for CPU-only execution
   - Model swapping support via llama-swappo groups
   - 32K context (Qwen) and 16K context (DeepSeek)
-
-#### Web UI Dashboard
-- **Purpose**: Zero-dependencies web interface for model interaction
-- **Files Added**:
-  - `webui/dashboard.html` - Single-page web app with chat interface
-  - `webui/server.py` - Simple Python HTTP server with CORS support
-  - `webui/README.md` - Complete usage guide
-- **Features**:
-  - Model selection and switching
-  - Interactive chat with code syntax highlighting
-  - Real-time health monitoring
-  - Usage statistics tracking
-  - Responsive modern UI
 
 #### Testing Utilities
 - **Purpose**: Comprehensive testing and evaluation tools
@@ -82,12 +69,6 @@ This fork adds CPU-only support for AMD Strix Halo, comprehensive documentation,
    - Advanced techniques
    - Troubleshooting
 
-4. **webui/README.md**
-   - Web UI setup guide
-   - Alternative UI options (Open WebUI, Continue.dev)
-   - Comparison table
-   - Security notes
-
 #### Updated Documentation
 - **README.md**:
   - Added CPU-only mode section as recommended setup
@@ -125,14 +106,6 @@ models:
 
 ### 🎨 UI/UX Improvements
 
-#### Web Dashboard
-- Modern gradient design (purple theme)
-- Responsive layout (mobile-friendly)
-- Real-time status indicators
-- Code syntax highlighting in chat
-- Usage statistics dashboard
-- Streaming response support
-
 #### Interactive CLI Chat
 - Color-coded output
 - Command system (/model, /clear, /quit)
@@ -167,16 +140,6 @@ models:
 - Code explanation: 3-8 seconds
 - Bug fixing: 2-6 seconds
 
-### 🔒 Security
-
-#### Web UI Considerations
-- Dashboard binds to 0.0.0.0 (all interfaces)
-- No authentication in built-in dashboard
-- Documented security recommendations:
-  - Use reverse proxy for production
-  - Or use Open WebUI (has user management)
-  - Or bind to 127.0.0.1 for local-only access
-
 ### 🧪 Testing
 
 #### Test Coverage
@@ -203,10 +166,6 @@ llama-swappo-halo/
 │   ├── test_models.py                 # NEW: Test suite
 │   ├── interactive_chat.py            # NEW: CLI chat
 │   └── quick_tests.sh                 # NEW: Quick tests
-├── webui/
-│   ├── dashboard.html                 # NEW: Web dashboard
-│   ├── server.py                      # NEW: Web server
-│   └── README.md                      # NEW: Web UI docs
 ├── scripts/
 │   └── download-models.sh             # MODIFIED: Added new models
 └── README.md                          # MODIFIED: Added CPU section
@@ -236,7 +195,6 @@ HIP_VISIBLE_DEVICES=-1
 #### Potential Additions
 - [ ] GPU acceleration once ROCm/llama.cpp compatibility improves
 - [ ] Additional code models (CodeLlama, StarCoder)
-- [ ] Web UI authentication
 - [ ] Prompt template library
 - [ ] Model fine-tuning support
 - [ ] Batch processing API
@@ -265,9 +223,9 @@ MIT (same as upstream)
 
 ## Summary of Changes
 
-### Files Added: 11
+### Files Added: 8
 - 3 configuration files
-- 6 documentation files
+- 3 documentation files
 - 2 example scripts
 
 ### Files Modified: 3
@@ -275,21 +233,19 @@ MIT (same as upstream)
 - scripts/download-models.sh
 - (Config files added, not modified)
 
-### Lines of Code Added: ~3,500
-- HTML/CSS/JS: ~650
+### Lines of Code Added: ~2,850
 - Python: ~700
 - Bash: ~200
 - Documentation: ~1,950
 
-### New Features: 8
+### New Features: 7
 1. CPU-only mode with GPU hiding
 2. Two pre-configured code models
-3. Web UI dashboard
-4. Interactive CLI chat
-5. Comprehensive test suite
-6. Quick test scripts
-7. Complete documentation suite
-8. API usage guide
+3. Interactive CLI chat
+4. Comprehensive test suite
+5. Quick test scripts
+6. Complete documentation suite
+7. API usage guide
 
 ### Bug Fixes: 2
 1. GPU memory access fault
@@ -325,18 +281,6 @@ python examples/interactive_chat.py
 
 # Full test suite
 python examples/test_models.py
-```
-
-### Web UI Commands
-```bash
-# Built-in dashboard
-cd webui && python3 server.py
-# Open http://localhost:8081/dashboard.html
-
-# Open WebUI (alternative)
-docker run -d -p 3000:8080 \
-  --add-host=host.docker.internal:host-gateway \
-  ghcr.io/open-webui/open-webui:main
 ```
 
 ---

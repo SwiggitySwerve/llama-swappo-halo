@@ -9,6 +9,11 @@ metadata:
     config-version: "2026-01-05-discover-5-models"
 spec:
   replicas: 1
+  # Use Recreate strategy to prevent port conflicts with hostNetwork
+  # This terminates the old pod before starting the new one
+  # Brief downtime (~30s) during updates, but avoids port 8080 conflicts
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: llama-swappo-halo

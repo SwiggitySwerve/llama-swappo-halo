@@ -161,6 +161,8 @@ git push
 - You must either restart manually or update deployment annotations
 - The annotation method is GitOps-friendly (no kubectl access needed)
 - Flux syncs every 5 minutes by default, or use `flux reconcile` for immediate sync
+- **Deployment uses `strategy: Recreate`** - This causes ~30 seconds of downtime during updates to prevent port 8080 conflicts with `hostNetwork: true`
+- If a new pod is stuck in Pending state, manually delete the old pod: `kubectl delete pod -l app=llama-swappo-halo`
 
 ### Model Management
 
@@ -304,6 +306,23 @@ kubectl rollout restart deployment/llama-swappo-halo
 **Flux not syncing**: Check `flux get kustomizations`, force reconcile with `flux reconcile kustomization flux-system --with-source`
 
 **Service not accessible**: Verify `hostNetwork: true` in deployment, check host firewall
+
+**Pod stuck in Pending after deployment update**: This happens when using `hostNetwork: true` without proper deployment strategy. The new pod can't bind to port 8080 because the old pod is still running.
+
+**Solution**: The deployment now uses `strategy: Recreate` which automatically terminates old pods before starting new ones. This causes ~30 seconds of downtime during updates but prevents port conflicts. If you still encounter this:
+
+```bash
+# Manually delete the old pod to allow the new one to start
+kubectl delete pod -l app=llama-swappo-halo
+
+# Verify new pod is running
+kubectl get pods -l app=llama-swappo-halo
+
+# Check all 5 models are discovered
+curl -s http://localhost:8080/v1/models | jq -r '.data[] | .id' | sort
+```
+
+**Why this happens**: With `hostNetwork: true`, pods use the host's network namespace and bind directly to host ports. Kubernetes' default RollingUpdate strategy starts new pods before terminating old ones, causing both to compete for port 8080.
 
 ### Log Viewing
 

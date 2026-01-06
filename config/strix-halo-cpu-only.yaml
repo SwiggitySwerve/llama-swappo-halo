@@ -29,10 +29,10 @@ groups:
     exclusive: true
     # Example main models
     members:
-      # - "qwen3-4b-instruct-2507-q8_0"
-      # - "qwen2.5-coder-3b-instruct-q4_k_m"
-      # - "gpt-oss-20b-q8_k_xl"  # Uncomment to enable
+      - "qwen2.5-coder-32b-instruct-q5_k_m"
+      - "gpt-oss-20b-q8_k_xl"
       - "qwen2.5-coder-7b-instruct-q5_k_m"
+      - "qwen2.5-coder-3b-instruct-q4_k_m"
       - "deepseek-coder-v2-lite-instruct-q4_k_m"
 
   # Speech-to-text group (requires ENABLE_WHISPER=1 build)
@@ -113,6 +113,66 @@ models:
   # =============================================================================
 
   # Small models (3-8B)
+
+  "qwen2.5-coder-3b-instruct-q4_k_m":
+    cmd: |
+      ${llama}
+      -m /models/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/qwen2.5-coder-3b-instruct-q4_k_m.gguf
+      --ctx-size 32768
+      --n-gpu-layers 0
+    name: "Qwen2.5-Coder 3B Instruct"
+    description: "Fast code model with 32K context, optimized for quick coding tasks"
+    env:
+      - "HIP_VISIBLE_DEVICES=-1"
+    metadata:
+      architecture: "qwen2.5"
+      contextLength: 32768
+      capabilities:
+        - completion
+        - tools
+      family: "qwen"
+      parameterSize: "3B"
+      quantizationLevel: "Q4_K_M"
+
+  "qwen2.5-coder-32b-instruct-q5_k_m":
+    cmd: |
+      ${llama}
+      -m /models/Qwen/Qwen2.5-Coder-32B-Instruct-GGUF/qwen2.5-coder-32b-instruct-q5_k_m.gguf
+      --ctx-size 32768
+      --n-gpu-layers 0
+    name: "Qwen2.5-Coder 32B Instruct"
+    description: "Large code-focused model with 32K context, excellent for complex programming tasks (91.6% HumanEval)"
+    env:
+      - "HIP_VISIBLE_DEVICES=-1"
+    metadata:
+      architecture: "qwen2.5"
+      contextLength: 32768
+      capabilities:
+        - completion
+        - tools
+      family: "qwen"
+      parameterSize: "32B"
+      quantizationLevel: "Q5_K_M"
+
+  "gpt-oss-20b-q8_k_xl":
+    cmd: |
+      ${llama}
+      -m /models/unsloth/gpt-oss-20b-GGUF/gpt-oss-20b-UD-Q8_K_XL.gguf
+      --ctx-size 102400
+      --n-gpu-layers 0
+    name: "GPT-OSS 20B"
+    description: "Large general-purpose model with 102K context, excellent for complex reasoning"
+    env:
+      - "HIP_VISIBLE_DEVICES=-1"
+    metadata:
+      architecture: "gpt-oss"
+      contextLength: 102400
+      capabilities:
+        - completion
+        - tools
+      family: "openai"
+      parameterSize: "20.9B"
+      quantizationLevel: "Q8_K_XL"
 
   # "qwen2.5-coder-3b-instruct-q4_k_m":
   #   cmd: |

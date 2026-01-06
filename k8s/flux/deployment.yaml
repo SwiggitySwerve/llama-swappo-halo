@@ -5,6 +5,8 @@ metadata:
   namespace: default
   labels:
     app: llama-swappo-halo
+  annotations:
+    config-version: "5-models"
 spec:
   replicas: 1
   selector:
@@ -68,9 +70,11 @@ spec:
           path: /var/lib/llama-swappo/models
           type: Directory
       - name: config
-        hostPath:
-          path: /etc/llama-swappo
-          type: Directory
+        configMap:
+          name: llama-swappo-halo-config
+          items:
+          - key: config.yaml
+            path: config.yaml
       - name: dri
         hostPath:
           path: /dev/dri

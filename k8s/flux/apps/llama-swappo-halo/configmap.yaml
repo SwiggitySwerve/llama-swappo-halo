@@ -36,6 +36,7 @@ data:
         exclusive: true
         # Example main models
         members:
+          - "glm-4.7-flash-q8_0"
           - "qwen2.5-coder-32b-instruct-q5_k_m"
           - "gpt-oss-20b-q8_k_xl"
           - "qwen2.5-coder-7b-instruct-q5_k_m"
@@ -220,6 +221,26 @@ data:
           family: "deepseek"
           parameterSize: "2.4B"
           quantizationLevel: "Q4_K_M"
+
+      "glm-4.7-flash-q8_0":
+        cmd: |
+          ${llama}
+          -m /models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-Q8_0.gguf
+          --ctx-size 32768
+          --n-gpu-layers 0
+        name: "GLM-4.7 Flash"
+        description: "30B-A3B MoE model from ZAI, strong general-purpose and coding capabilities with 128K native context"
+        env:
+          - "HIP_VISIBLE_DEVICES=-1"
+        metadata:
+          architecture: "glm4"
+          contextLength: 32768
+          capabilities:
+            - completion
+            - tools
+          family: "glm"
+          parameterSize: "30B-A3B"
+          quantizationLevel: "Q8_0"
 
       # Embedding models
 

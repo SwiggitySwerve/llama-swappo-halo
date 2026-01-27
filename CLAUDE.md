@@ -9,31 +9,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    llama-swappo-halo                    │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  llama-swap (Go proxy)                            │  │
-│  │  - Ollama API translation                         │  │
-│  │  - Model management & swapping                    │  │
-│  │  - Port 8080                                      │  │
-│  └───────────────────────────────────────────────────┘  │
-│                          │                               │
-│                          ▼                               │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  llama-server (llama.cpp)                         │  │
-│  │  - GGUF model loading                             │  │
-│  │  - Dynamic port assignment                        │  │
-│  │  - CPU-only or GPU (ROCm)                         │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                    k3s Cluster                          │
-│  - Flux CD for GitOps automation                        │
-│  - hostNetwork: true for LAN access                    │
-│  - Models stored on host at /var/lib/llama-swappo/models│
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│         LAN Clients                     │
+│   http://192.168.68.100:8080           │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│          MetalLB L2 LoadBalancer        │
+│   IP: 192.168.68.100 (ARP advertised)   │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│      Kubernetes Service (LoadBalancer)  │
+│      Port: 8080                         │
+└────────────────┬────────────────────────┘
+                 │
+         ┌───────┴───────┐
+         ▼               ▼
+┌──────────────┐  ┌──────────────┐
+│ Pod (old)    │  │ Pod (new)    │  (RollingUpdate: zero downtime)
+│              │  │              │
+│ llama-swap   │  │ llama-swap   │
+│   ↓          │  │   ↓          │
+│ llama-server │  │ llama-server │
+└──────────────┘  └──────────────┘
+         │               │
+         └───────┬───────┘
+                 ▼
+┌─────────────────────────────────────────┐
+│                    k3s Cluster          │
+│  - Flux CD for GitOps automation        │
+│  - MetalLB LoadBalancer (zero downtime) │
+│  - Models: /var/lib/llama-swappo/models │
+│  - GPU devices: /dev/dri, /dev/kfd      │
+└─────────────────────────────────────────┘
 ```
 
 ### Key Components

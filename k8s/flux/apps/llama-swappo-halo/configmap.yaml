@@ -37,6 +37,7 @@ data:
         # Example main models
         members:
           - "glm-4.7-flash-q8_0"
+          - "glm-4.7-flash-q4_k_m"
           - "qwen2.5-coder-32b-instruct-q5_k_m"
           - "gpt-oss-20b-q8_k_xl"
           - "qwen2.5-coder-7b-instruct-q5_k_m"
@@ -228,8 +229,8 @@ data:
           -m /models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-Q8_0.gguf
           --ctx-size 32768
           --n-gpu-layers 0
-        name: "GLM-4.7 Flash"
-        description: "30B-A3B MoE model from ZAI, strong general-purpose and coding capabilities with 128K native context"
+        name: "GLM-4.7 Flash Q8"
+        description: "30B-A3B MoE model from ZAI, strong general-purpose and coding capabilities with 128K native context (high quality)"
         env:
           - "HIP_VISIBLE_DEVICES=-1"
         metadata:
@@ -241,6 +242,26 @@ data:
           family: "glm"
           parameterSize: "30B-A3B"
           quantizationLevel: "Q8_0"
+
+      "glm-4.7-flash-q4_k_m":
+        cmd: |
+          ${llama}
+          -m /models/unsloth/GLM-4.7-Flash-GGUF/GLM-4.7-Flash-Q4_K_M.gguf
+          --ctx-size 32768
+          --n-gpu-layers 0
+        name: "GLM-4.7 Flash Q4"
+        description: "30B-A3B MoE model from ZAI, strong general-purpose and coding capabilities with 128K native context (smaller/faster)"
+        env:
+          - "HIP_VISIBLE_DEVICES=-1"
+        metadata:
+          architecture: "glm4"
+          contextLength: 32768
+          capabilities:
+            - completion
+            - tools
+          family: "glm"
+          parameterSize: "30B-A3B"
+          quantizationLevel: "Q4_K_M"
 
       # Embedding models
 
